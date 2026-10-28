@@ -70,7 +70,7 @@ export default function TaskForm({ onCreated }: { onCreated: (task: Task) => voi
           </select>
         </label>
         <label>
-          마감일 (선택){' '}
+          마감일{' '}
           <input
             type="date"
             aria-label="마감일"
