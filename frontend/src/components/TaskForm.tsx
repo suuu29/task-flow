@@ -31,7 +31,7 @@ export default function TaskForm({ onCreated }: { onCreated: (task: Task) => voi
       setDescription('')
       setPriority('NORMAL')
       setDueDate('')
-      setSuggestKey((k) => k + 1) // 저장되지 않는 제안 값도 비운다.
+      setSuggestKey((k) => k + 1) // 제안 이유도 비운다.
     } catch (err) {
       // 실패하면 입력한 내용을 그대로 둔다.
       setError(err instanceof Error ? err.message : '저장하지 못했습니다.')
@@ -83,7 +83,16 @@ export default function TaskForm({ onCreated }: { onCreated: (task: Task) => voi
         <button type="submit" className="ai-btn" disabled={saving}>
           {saving ? '저장 중...' : '등록'}
         </button>
-        <SuggestControls key={suggestKey} title={title} description={description} />
+        <SuggestControls
+          key={suggestKey}
+          title={title}
+          description={description}
+          onSuggested={(p, d) => {
+            // 위 칸을 채우기만 한다. 저장은 [등록]을 눌러야 한다.
+            setPriority(p)
+            setDueDate(d ?? '')
+          }}
+        />
         <BreakdownControls topic={title} onCreated={onCreated} />
       </div>
       {error && <p role="alert">{error}</p>}

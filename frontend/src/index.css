@@ -204,18 +204,6 @@ main {
   margin-bottom: 0.4rem;
 }
 
-.suggest-fields {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.4rem;
-}
-
-.suggest-fields select,
-.suggest-fields input {
-  width: auto;
-  margin-bottom: 0;
-}
-
 .suggest p {
   margin: 0.25rem 0 0;
 }
@@ -224,8 +212,8 @@ main {
   color: #4b5563;
 }
 
-/* [AI 제안]과 [AI로 할 일 만들기]를 한 줄에 펼친다.
-   순서: 우선순위·마감일 칸 → 두 버튼 → 결과(이유, 오류, 미리 보기). */
+/* [등록] [AI 제안] [AI로 할 일 만들기]를 한 줄에 펼친다.
+   순서: 두 버튼 → 결과(이유, 오류, 미리 보기). 우선순위·마감일 칸은 폼의 field-row 이다. */
 .ai-tools {
   display: flex;
   flex-wrap: wrap;
@@ -236,12 +224,6 @@ main {
 .ai-tools > .suggest,
 .ai-tools > .breakdown {
   display: contents;
-}
-
-.ai-tools .suggest-fields {
-  order: 0;
-  flex-basis: 100%;
-  margin-top: 0;
 }
 
 .ai-tools .ai-btn,

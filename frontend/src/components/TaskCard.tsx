@@ -93,7 +93,15 @@ export default function TaskCard({ task, onChangeStatus, onUpdate, onDelete }: P
             />
           </label>
         </div>
-        <SuggestControls title={title} description={description} />
+        <SuggestControls
+          title={title}
+          description={description}
+          onSuggested={(p, d) => {
+            // 위 칸을 채우기만 한다. 저장은 [저장]을 눌러야 한다.
+            setPriority(p)
+            setDueDate(d ?? '')
+          }}
+        />
         <div className="card-actions">
           <button onClick={save} disabled={busy}>
             저장
