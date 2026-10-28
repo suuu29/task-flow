@@ -40,6 +40,21 @@ class Suggestion(BaseModel):
     reason: str
 
 
+class BreakdownRequest(BaseModel):
+    # 값 검사는 rules.py 한 곳에서 한다. (D-006)
+    topic: Any = None
+
+
+class BreakdownTask(BaseModel):
+    title: str
+    priority: Priority
+    due_date: str | None
+
+
+class Breakdown(BaseModel):
+    tasks: list[BreakdownTask]
+
+
 class Credentials(BaseModel):
     # 값 검사는 rules.py 한 곳에서 한다. 여기서는 받기만 한다.
     username: Any = None

@@ -127,3 +127,22 @@ main {
 [role='alert'] {
   color: #b91c1c;
 }
+
+.breakdown-preview {
+  list-style: none;
+  margin: 0.4rem 0;
+  padding: 0;
+}
+
+.breakdown-preview li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.breakdown-preview span {
+  color: #4b5563;
+  white-space: nowrap;
+}

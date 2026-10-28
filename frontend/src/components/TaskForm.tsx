@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { createTask } from '../api'
 import type { Task } from '../types'
+import BreakdownControls from './BreakdownControls'
 
 export default function TaskForm({ onCreated }: { onCreated: (task: Task) => void }) {
   const [title, setTitle] = useState('')
@@ -45,6 +46,7 @@ export default function TaskForm({ onCreated }: { onCreated: (task: Task) => voi
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
+      <BreakdownControls topic={title} onCreated={onCreated} />
       <button type="submit" disabled={saving}>
         {saving ? '저장 중...' : '등록'}
       </button>

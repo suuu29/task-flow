@@ -50,6 +50,19 @@ def validate_priority(priority: object) -> Priority:
         raise RuleError("우선순위는 LOW, NORMAL, HIGH 중 하나여야 합니다.") from None
 
 
+MAX_TOPIC_LENGTH = 200  # 너무 긴 입력으로 모델 호출 비용이 커지는 것을 막는다.
+
+
+def validate_topic(topic: object) -> str:
+    # 필수이고 공백만 있으면 거부한다. 앞뒤 공백은 지운다.
+    if not isinstance(topic, str) or not topic.strip():
+        raise RuleError("주제는 비워 둘 수 없습니다.")
+    value = topic.strip()
+    if len(value) > MAX_TOPIC_LENGTH:
+        raise RuleError(f"주제는 {MAX_TOPIC_LENGTH}자 이하여야 합니다.")
+    return value
+
+
 _DUE_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 

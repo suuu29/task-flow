@@ -8,6 +8,7 @@ from app.rules import (
     validate_priority,
     validate_status,
     validate_title,
+    validate_topic,
 )
 
 
@@ -21,6 +22,22 @@ class PriorityRuleTest(unittest.TestCase):
             with self.subTest(bad=bad):
                 with self.assertRaises(RuleError):
                     validate_priority(bad)
+
+
+class TopicRuleTest(unittest.TestCase):
+    def test_trims(self):
+        self.assertEqual(validate_topic("  이사 준비  "), "이사 준비")
+
+    def test_length_limit(self):
+        self.assertEqual(validate_topic("가" * 200), "가" * 200)
+        with self.assertRaises(RuleError):
+            validate_topic("가" * 201)
+
+    def test_rejects_empty_and_not_string(self):
+        for bad in ["", "   ", None, 3]:
+            with self.subTest(bad=bad):
+                with self.assertRaises(RuleError):
+                    validate_topic(bad)
 
 
 class DueDateRuleTest(unittest.TestCase):

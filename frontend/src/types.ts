@@ -7,6 +7,15 @@ export interface Task {
   status: Status
 }
 
+export type Priority = 'LOW' | 'NORMAL' | 'HIGH'
+
+// POST /tasks/breakdown 응답의 한 항목. 저장되지 않는 제안이다. (등록하면 제목만 저장된다.)
+export interface BreakdownTask {
+  title: string
+  priority: Priority
+  due_date: string | null
+}
+
 export interface User {
   id: number
   username: string

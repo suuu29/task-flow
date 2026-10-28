@@ -10,6 +10,7 @@ import anthropic
 import httpx2 as httpx
 from fastapi import HTTPException
 
+from app import ai as ai_module
 from app import suggest as suggest_module
 from app import tasks as tasks_module
 from app.auth import current_user
@@ -72,7 +73,7 @@ class SuggestTest(unittest.TestCase):
 
     def call(self, result, title="보고서 제출", description="내일까지"):
         client = FakeClient(result)
-        with mock.patch.object(suggest_module, "make_client", return_value=client):
+        with mock.patch.object(ai_module, "make_client", return_value=client):
             try:
                 out = suggest_module.suggest(SuggestRequest(title=title, description=description))
                 return out, None, client
@@ -134,7 +135,7 @@ class SuggestTest(unittest.TestCase):
 
     def test_missing_key_is_503(self):
         os.environ.pop("ANTHROPIC_API_KEY")
-        with mock.patch.object(suggest_module, "get_anthropic_api_key") as get_key:
+        with mock.patch.object(ai_module, "get_anthropic_api_key") as get_key:
             from app.config import ConfigError
 
             get_key.side_effect = ConfigError("x")

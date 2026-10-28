@@ -1,4 +1,4 @@
-import type { Status, Task, User } from './types'
+import type { BreakdownTask, Status, Task, User } from './types'
 
 // 상태 코드를 담은 오류. 401(로그인 안 됨)을 연결 실패 등과 구분하는 데 쓴다.
 export class ApiError extends Error {
@@ -75,6 +75,16 @@ export function createTask(input: { title: string; description: string }): Promi
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
   })
+}
+
+// 주제를 3~5개의 할 일로 나눈 제안만 받는다. 서버는 아무것도 저장하지 않는다.
+export async function breakdownTopic(input: { topic: string }): Promise<BreakdownTask[]> {
+  const body = await request<{ tasks: BreakdownTask[] }>('/tasks/breakdown', {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    body: JSON.stringify(input),
+  })
+  return body.tasks
 }
 
 export function changeStatus(id: number, status: Status): Promise<Task> {
