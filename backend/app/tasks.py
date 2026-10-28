@@ -3,9 +3,15 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.auth import current_user
 from app.db import connect
 from app.rules import (
+    Priority,
     RuleError,
     Status,
+    is_overdue,
+    sort_key,
+    today,
     validate_description,
+    validate_due_date,
+    validate_priority,
     validate_status,
     validate_title,
 )
@@ -17,11 +23,15 @@ router = APIRouter(prefix="/tasks", tags=["tasks"], dependencies=[Depends(curren
 
 
 def _to_task(row) -> Task:
+    # 기한 초과는 저장하는 값이 아니라 요청이 올 때의 오늘 날짜로 계산한다. (R-011)
     return Task(
         id=row["id"],
         title=row["title"],
         description=row["description"],
         status=row["status"],
+        priority=row["priority"],
+        due_date=row["due_date"],
+        is_overdue=is_overdue(row["due_date"], row["status"], today()),
     )
 
 
@@ -30,19 +40,25 @@ def list_tasks(user: User = Depends(current_user)) -> list[Task]:
     # 읽기에 실패하면 예외가 그대로 오류 응답이 된다. 빈 목록으로 응답하지 않는다.
     conn = connect()
     try:
-        rows = conn.execute(
-            "SELECT * FROM tasks WHERE owner_id = ? ORDER BY id", (user.id,)
-        ).fetchall()
+        rows = conn.execute("SELECT * FROM tasks WHERE owner_id = ?", (user.id,)).fetchall()
     finally:
         conn.close()
-    return [_to_task(r) for r in rows]
+    # 서버가 정렬해서 준다. 기한 초과 → 우선순위 → 마감일 → 만든 순서. (R-012)
+    tasks = [_to_task(r) for r in rows]
+    return sorted(tasks, key=lambda t: sort_key(t.id, t.priority, t.due_date, t.is_overdue))
 
 
 @router.post("", response_model=Task, status_code=201)
 def create_task(body: TaskCreate, user: User = Depends(current_user)) -> Task:
+    # 보내지 않은 priority · due_date 는 NORMAL · 없음이다. 보냈다면 수정과 같은 규칙으로 검사한다.
+    priority, due_date = Priority.NORMAL, None
     try:
         title = validate_title(body.title)
         description = validate_description(body.description)
+        if "priority" in body.model_fields_set:
+            priority = validate_priority(body.priority)
+        if "due_date" in body.model_fields_set:
+            due_date = validate_due_date(body.due_date)
     except RuleError as e:
         raise HTTPException(status_code=422, detail=str(e)) from None
 
@@ -51,8 +67,9 @@ def create_task(body: TaskCreate, user: User = Depends(current_user)) -> Task:
     try:
         with conn:
             cur = conn.execute(
-                "INSERT INTO tasks (title, description, status, owner_id) VALUES (?, ?, ?, ?)",
-                (title, description, Status.TODO.value, user.id),
+                "INSERT INTO tasks (title, description, status, owner_id, priority, due_date)"
+                " VALUES (?, ?, ?, ?, ?, ?)",
+                (title, description, Status.TODO.value, user.id, priority.value, due_date),
             )
         row = conn.execute("SELECT * FROM tasks WHERE id = ?", (cur.lastrowid,)).fetchone()
     finally:
@@ -72,22 +89,29 @@ def _get_or_404(conn, task_id: int, owner_id: int):
 
 @router.patch("/{task_id}", response_model=Task)
 def update_task(task_id: int, body: TaskUpdate, user: User = Depends(current_user)) -> Task:
-    # 제목·설명만 고친다. 규칙은 등록과 같은 것을 쓴다. (D-006)
+    # 제목·설명·우선순위·마감일을 고친다. 규칙은 등록과 같은 것을 쓴다. (D-006)
+    # 보내지 않은 필드는 그대로 둔다. due_date 는 null 이면 지우고, priority 는 null 이면 거부한다.
     conn = connect()
     try:
         row = _get_or_404(conn, task_id, user.id)
         title, description = row["title"], row["description"]
+        priority, due_date = row["priority"], row["due_date"]
         try:
             if "title" in body.model_fields_set:
                 title = validate_title(body.title)
             if "description" in body.model_fields_set:
                 description = validate_description(body.description)
+            if "priority" in body.model_fields_set:
+                priority = validate_priority(body.priority).value
+            if "due_date" in body.model_fields_set:
+                due_date = validate_due_date(body.due_date)
         except RuleError as e:
             raise HTTPException(status_code=422, detail=str(e)) from None
         with conn:
             conn.execute(
-                "UPDATE tasks SET title = ?, description = ? WHERE id = ? AND owner_id = ?",
-                (title, description, task_id, user.id),
+                "UPDATE tasks SET title = ?, description = ?, priority = ?, due_date = ?"
+                " WHERE id = ? AND owner_id = ?",
+                (title, description, priority, due_date, task_id, user.id),
             )
         row = _get_or_404(conn, task_id, user.id)
     finally:

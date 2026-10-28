@@ -48,6 +48,59 @@ main {
   color: #4b5563;
 }
 
+.card.overdue {
+  border-color: #b91c1c;
+}
+
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.badge {
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.badge-high {
+  border-color: #f59e0b;
+  color: #92400e;
+}
+
+.badge-low {
+  color: #6b7280;
+}
+
+.badge-overdue {
+  border-color: #b91c1c;
+  background: #b91c1c;
+  color: #fff;
+}
+
+.due-date {
+  color: #4b5563;
+}
+
+.field-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.card .field-row input {
+  display: inline-block;
+  width: auto;
+  margin-bottom: 0;
+}
+
 .task-form {
   display: flex;
   flex-direction: column;

@@ -1,4 +1,4 @@
-"""alembic 이전(0001~0004)을 임시 복사본 DB 로 연습한다. 실제 taskflow.db 는 건드리지 않는다.
+"""alembic 이전(0001~0005)을 임시 복사본 DB 로 연습한다. 실제 taskflow.db 는 건드리지 않는다.
 
 DATA-MIGRATION-PLAN.md 6절 B(복사본에서 연습)와 C(수량 비교)를 자동으로 확인한다.
 테스트에 쓰는 사용자와 비밀번호는 가짜 값이다.
@@ -111,7 +111,7 @@ class FullMigrationTest(MigrationBase):
         self.upgrade()
 
     def test_version_is_head(self):
-        self.assertEqual(self.version(), [("0004",)])
+        self.assertEqual(self.version(), [("0005",)])
 
     def test_tasks_count_ids_and_values_unchanged(self):
         after = self.rows("SELECT id, title, description, status FROM tasks ORDER BY id")
@@ -152,7 +152,7 @@ class FullMigrationTest(MigrationBase):
         snap = self.rows("SELECT * FROM tasks ORDER BY id")
         self.upgrade()
         self.assertEqual(self.rows("SELECT * FROM tasks ORDER BY id"), snap)
-        self.assertEqual(self.version(), [("0004",)])
+        self.assertEqual(self.version(), [("0005",)])
         self.assertEqual(self.rows("SELECT COUNT(*) FROM users"), [(1,)])
 
     def test_app_starts_on_migrated_database(self):
@@ -206,6 +206,11 @@ class StepwiseAndFailureTest(MigrationBase):
             )
         self.upgrade("0004")
         self.assertEqual(self.version(), [("0004",)])
+        self.upgrade("0005")
+        self.assertEqual(self.version(), [("0005",)])
+        self.assertEqual(
+            self.rows("SELECT id, title, description, status FROM tasks ORDER BY id"), before
+        )
 
     def test_failed_step_changes_nothing_and_stays_at_previous_version(self):
         before = make_legacy_db(self.db)
@@ -243,7 +248,7 @@ class StepwiseAndFailureTest(MigrationBase):
     def test_empty_legacy_database_migrates(self):
         make_legacy_db(self.db, rows=[], delete_last=False)
         self.upgrade()
-        self.assertEqual(self.version(), [("0004",)])
+        self.assertEqual(self.version(), [("0005",)])
         self.assertEqual(self.rows("SELECT COUNT(*) FROM tasks"), [(0,)])
         self.assertEqual(self.rows("PRAGMA foreign_key_check"), [])
 
@@ -270,7 +275,82 @@ class StepwiseAndFailureTest(MigrationBase):
         with self.assertRaises(NotImplementedError):
             with redirect_stderr(io.StringIO()):
                 command.downgrade(self.cfg(), "0003")
+        self.assertEqual(self.version(), [("0005",)])
+
+
+class PriorityDueMigrationTest(MigrationBase):
+    # 0005: priority(NOT NULL, 기본 NORMAL)와 due_date(비울 수 있음)를 더한다. (#19)
+    def setUp(self):
+        super().setUp()
+        self.before = make_legacy_db(self.db)
+        self.upgrade("0004")
+
+    def test_existing_rows_get_normal_and_no_due_date_and_keep_values(self):
+        old = self.rows("SELECT id, title, description, status, owner_id FROM tasks ORDER BY id")
+        self.upgrade("0005")
+        new = self.rows(
+            "SELECT id, title, description, status, owner_id, priority, due_date FROM tasks ORDER BY id"
+        )
+        self.assertEqual([r[:5] for r in new], old)
+        self.assertEqual({r[5] for r in new}, {"NORMAL"})
+        self.assertEqual({r[6] for r in new}, {None})
+        self.assertEqual(len(new), len(self.before))
+
+    def test_new_columns_and_kept_constraints(self):
+        self.upgrade("0005")
+        conn = sqlite3.connect(self.db)
+        try:
+            cols = {r[1]: (r[2], r[3], r[4]) for r in conn.execute("PRAGMA table_info(tasks)")}
+            fks = [tuple(r[2:4]) for r in conn.execute("PRAGMA foreign_key_list(tasks)")]
+        finally:
+            conn.close()
+        self.assertEqual(cols["priority"], ("TEXT", 1, "'NORMAL'"))
+        self.assertEqual(cols["due_date"], ("TEXT", 0, None))
+        self.assertEqual(cols["owner_id"][1], 1)
+        self.assertEqual(fks, [("users", "owner_id")])
+        self.assertEqual(self.rows("PRAGMA foreign_key_check"), [])
+
+    def test_task_without_owner_is_still_rejected(self):
+        self.upgrade("0005")
+        conn = connect(self.db)
+        try:
+            with self.assertRaises(sqlite3.IntegrityError):
+                with conn:
+                    conn.execute("INSERT INTO tasks (title, status) VALUES ('a', 'TODO')")
+        finally:
+            conn.close()
+
+    def test_running_again_changes_nothing(self):
+        self.upgrade("0005")
+        snap = self.rows("SELECT * FROM tasks ORDER BY id")
+        self.upgrade("head")
+        self.assertEqual(self.rows("SELECT * FROM tasks ORDER BY id"), snap)
+        self.assertEqual(self.version(), [("0005",)])
+
+    def test_stops_when_columns_already_exist_and_changes_nothing(self):
+        conn = sqlite3.connect(self.db)
+        with conn:
+            conn.execute("ALTER TABLE tasks ADD COLUMN priority TEXT NOT NULL DEFAULT 'NORMAL'")
+        conn.close()
+        snap = structure(self.db)
+        rows = self.rows("SELECT * FROM tasks ORDER BY id")
+        with self.assertRaises(RuntimeError):
+            self.upgrade("0005")
+        self.assertEqual(structure(self.db), snap)
+        self.assertEqual(self.rows("SELECT * FROM tasks ORDER BY id"), rows)
         self.assertEqual(self.version(), [("0004",)])
+
+    def test_app_refuses_database_without_new_columns_and_leaves_it_unchanged(self):
+        snap = structure(self.db)
+        with self.assertRaises(MigrationRequired):
+            init_db()
+        self.assertEqual(structure(self.db), snap)
+        self.assertEqual(self.version(), [("0004",)])
+
+    def test_app_starts_after_0005_and_keeps_rows(self):
+        self.upgrade("0005")
+        init_db()
+        self.assertEqual(self.rows("SELECT COUNT(*) FROM tasks"), [(len(self.before),)])
 
 
 if __name__ == "__main__":

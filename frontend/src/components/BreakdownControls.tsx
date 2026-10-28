@@ -56,7 +56,12 @@ export default function BreakdownControls({
     let rest = items
     try {
       for (const item of items) {
-        const task = await createTask({ title: item.title, description: '' })
+        const task = await createTask({
+          title: item.title,
+          description: '',
+          priority: 'NORMAL',
+          due_date: null,
+        })
         onCreated(task)
         rest = rest.slice(1)
         setItems(rest)
