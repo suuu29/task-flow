@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { COLUMNS, type Status, type Task } from '../types'
+import SuggestControls from './SuggestControls'
 
 interface Props {
   task: Task
@@ -61,6 +62,7 @@ export default function TaskCard({ task, onChangeStatus, onUpdate, onDelete }: P
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
+        <SuggestControls title={title} description={description} />
         <div className="card-actions">
           <button onClick={save} disabled={busy}>
             저장

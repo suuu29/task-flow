@@ -146,3 +146,27 @@ main {
   color: #4b5563;
   white-space: nowrap;
 }
+
+.suggest {
+  margin-bottom: 0.4rem;
+}
+
+.suggest-fields {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.suggest-fields select,
+.suggest-fields input {
+  width: auto;
+  margin-bottom: 0;
+}
+
+.suggest p {
+  margin: 0.25rem 0 0;
+}
+
+.suggest-reason {
+  color: #4b5563;
+}

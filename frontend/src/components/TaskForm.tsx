@@ -2,12 +2,14 @@ import { useState, type FormEvent } from 'react'
 import { createTask } from '../api'
 import type { Task } from '../types'
 import BreakdownControls from './BreakdownControls'
+import SuggestControls from './SuggestControls'
 
 export default function TaskForm({ onCreated }: { onCreated: (task: Task) => void }) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [suggestKey, setSuggestKey] = useState(0)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -24,6 +26,7 @@ export default function TaskForm({ onCreated }: { onCreated: (task: Task) => voi
       onCreated(task)
       setTitle('')
       setDescription('')
+      setSuggestKey((k) => k + 1) // 저장되지 않는 제안 값도 비운다.
     } catch (err) {
       // 실패하면 입력한 내용을 그대로 둔다.
       setError(err instanceof Error ? err.message : '저장하지 못했습니다.')
@@ -46,6 +49,7 @@ export default function TaskForm({ onCreated }: { onCreated: (task: Task) => voi
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
+      <SuggestControls key={suggestKey} title={title} description={description} />
       <BreakdownControls topic={title} onCreated={onCreated} />
       <button type="submit" disabled={saving}>
         {saving ? '저장 중...' : '등록'}

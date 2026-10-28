@@ -9,6 +9,13 @@ export interface Task {
 
 export type Priority = 'LOW' | 'NORMAL' | 'HIGH'
 
+// POST /tasks/suggest 응답. 저장되지 않는 제안 값이다.
+export interface Suggestion {
+  priority: Priority
+  due_date: string | null
+  reason: string
+}
+
 // POST /tasks/breakdown 응답의 한 항목. 저장되지 않는 제안이다. (등록하면 제목만 저장된다.)
 export interface BreakdownTask {
   title: string
