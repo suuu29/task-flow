@@ -49,11 +49,13 @@ export default function TaskForm({ onCreated }: { onCreated: (task: Task) => voi
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
-      <SuggestControls key={suggestKey} title={title} description={description} />
-      <BreakdownControls topic={title} onCreated={onCreated} />
-      <button type="submit" disabled={saving}>
-        {saving ? '저장 중...' : '등록'}
-      </button>
+      <div className="ai-tools">
+        <button type="submit" className="ai-btn" disabled={saving}>
+          {saving ? '저장 중...' : '등록'}
+        </button>
+        <SuggestControls key={suggestKey} title={title} description={description} />
+        <BreakdownControls topic={title} onCreated={onCreated} />
+      </div>
       {error && <p role="alert">{error}</p>}
     </form>
   )

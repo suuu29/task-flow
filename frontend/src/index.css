@@ -170,3 +170,42 @@ main {
 .suggest-reason {
   color: #4b5563;
 }
+
+/* [AI 제안]과 [AI로 할 일 만들기]를 한 줄에 펼친다.
+   순서: 우선순위·마감일 칸 → 두 버튼 → 결과(이유, 오류, 미리 보기). */
+.ai-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ai-tools > .suggest,
+.ai-tools > .breakdown {
+  display: contents;
+}
+
+.ai-tools .suggest-fields {
+  order: 0;
+  flex-basis: 100%;
+  margin-top: 0;
+}
+
+.ai-tools .ai-btn,
+.ai-tools [role='status'] {
+  order: 1;
+}
+
+.ai-tools .suggest-reason,
+.ai-tools [role='alert'],
+.ai-tools .breakdown-preview,
+.ai-tools .breakdown-register {
+  order: 2;
+}
+
+.ai-tools .suggest-reason,
+.ai-tools [role='alert'],
+.ai-tools .breakdown-preview {
+  flex-basis: 100%;
+  margin: 0;
+}

@@ -70,7 +70,7 @@ export default function BreakdownControls({
 
   return (
     <div className="breakdown">
-      <button type="button" onClick={make} disabled={busy}>
+      <button type="button" className="ai-btn" onClick={make} disabled={busy}>
         AI로 할 일 만들기
       </button>
       {loading && <span role="status"> 할 일을 만드는 중...</span>}
@@ -86,7 +86,7 @@ export default function BreakdownControls({
               </li>
             ))}
           </ul>
-          <button type="button" onClick={registerAll} disabled={busy}>
+          <button type="button" className="breakdown-register" onClick={registerAll} disabled={busy}>
             {registering ? '등록 중...' : '모두 등록'}
           </button>
         </>

@@ -55,7 +55,7 @@ export default function SuggestControls({
 
   return (
     <div className="suggest">
-      <button type="button" onClick={suggest} disabled={loading}>
+      <button type="button" className="ai-btn" onClick={suggest} disabled={loading}>
         AI 제안
       </button>
       {loading && <span role="status"> 제안을 받는 중...</span>}
