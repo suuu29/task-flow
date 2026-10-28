@@ -16,7 +16,7 @@ function failureMessage(err: unknown): string {
 
 // 주제(제목 입력란의 글)를 3~5개의 할 일로 나눈 제안을 미리 보여 준다.
 // 미리 보기 단계에서는 저장하지 않는다. [모두 등록]을 눌러야 기존 등록 기능(createTask)으로
-// 할 일마다 등록한다. 우선순위와 마감일은 저장 항목이 없어서 미리 보기에서만 보이고, 제목만 저장된다.
+// 할 일마다 등록한다. 제목 · 우선순위 · 마감일을 저장하고 설명은 비워 둔다.
 // 이 컴포넌트의 상태는 폼의 등록 버튼에 영향을 주지 않는다.
 export default function BreakdownControls({
   topic,
@@ -59,8 +59,8 @@ export default function BreakdownControls({
         const task = await createTask({
           title: item.title,
           description: '',
-          priority: 'NORMAL',
-          due_date: null,
+          priority: item.priority,
+          due_date: item.due_date,
         })
         onCreated(task)
         rest = rest.slice(1)

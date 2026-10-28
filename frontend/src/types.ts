@@ -29,7 +29,7 @@ export interface Suggestion {
   reason: string
 }
 
-// POST /tasks/breakdown 응답의 한 항목. 저장되지 않는 제안이다. (등록하면 제목만 저장된다.)
+// POST /tasks/breakdown 응답의 한 항목. 서버는 저장하지 않는 제안이고, [모두 등록]을 눌러야 저장된다.
 export interface BreakdownTask {
   title: string
   priority: Priority
