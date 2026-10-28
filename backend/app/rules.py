@@ -1,4 +1,5 @@
 import re
+from datetime import date
 from enum import StrEnum
 
 
@@ -6,6 +7,12 @@ class Status(StrEnum):
     TODO = "TODO"
     IN_PROGRESS = "IN_PROGRESS"
     DONE = "DONE"
+
+
+class Priority(StrEnum):
+    LOW = "LOW"
+    NORMAL = "NORMAL"
+    HIGH = "HIGH"
 
 
 class RuleError(ValueError):
@@ -34,6 +41,29 @@ def validate_status(status: object) -> Status:
         return Status(status)
     except ValueError:
         raise RuleError("상태는 TODO, IN_PROGRESS, DONE 중 하나여야 합니다.") from None
+
+
+def validate_priority(priority: object) -> Priority:
+    try:
+        return Priority(priority)
+    except ValueError:
+        raise RuleError("우선순위는 LOW, NORMAL, HIGH 중 하나여야 합니다.") from None
+
+
+_DUE_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def validate_due_date(due_date: object) -> str | None:
+    # YYYY-MM-DD 이고 실제 있는 날짜이거나 null 이다.
+    if due_date is None:
+        return None
+    if not isinstance(due_date, str) or not _DUE_DATE.match(due_date):
+        raise RuleError("마감일은 YYYY-MM-DD 형식이거나 null 이어야 합니다.")
+    try:
+        date.fromisoformat(due_date)
+    except ValueError:
+        raise RuleError("마감일은 실제 있는 날짜여야 합니다.") from None
+    return due_date
 
 
 # 계정 규칙. 값 검사는 여기 한 곳에서 한다. (D-006)

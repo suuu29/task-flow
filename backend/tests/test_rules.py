@@ -4,9 +4,35 @@ from app.rules import (
     RuleError,
     Status,
     validate_description,
+    validate_due_date,
+    validate_priority,
     validate_status,
     validate_title,
 )
+
+
+class PriorityRuleTest(unittest.TestCase):
+    def test_allowed(self):
+        for ok in ["LOW", "NORMAL", "HIGH"]:
+            self.assertEqual(validate_priority(ok), ok)
+
+    def test_rejects_others(self):
+        for bad in ["high", "URGENT", "", None, 1]:
+            with self.subTest(bad=bad):
+                with self.assertRaises(RuleError):
+                    validate_priority(bad)
+
+
+class DueDateRuleTest(unittest.TestCase):
+    def test_allowed(self):
+        self.assertIsNone(validate_due_date(None))
+        self.assertEqual(validate_due_date("2026-10-29"), "2026-10-29")
+
+    def test_rejects_bad_format_and_missing_dates(self):
+        for bad in ["2026-2-3", "10/29/2026", "2026-02-30", "2026-13-01", "", 20261029]:
+            with self.subTest(bad=bad):
+                with self.assertRaises(RuleError):
+                    validate_due_date(bad)
 
 
 class TitleRuleTest(unittest.TestCase):

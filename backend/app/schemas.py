@@ -2,7 +2,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from app.rules import Status
+from app.rules import Priority, Status
 
 
 class TaskCreate(BaseModel):
@@ -26,6 +26,18 @@ class Task(BaseModel):
     title: str
     description: str
     status: Status
+
+
+class SuggestRequest(BaseModel):
+    # 값 검사는 rules.py 한 곳에서 한다. (D-006)
+    title: Any = None
+    description: Any = None
+
+
+class Suggestion(BaseModel):
+    priority: Priority
+    due_date: str | None
+    reason: str
 
 
 class Credentials(BaseModel):
