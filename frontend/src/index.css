@@ -1,12 +1,38 @@
+/* 시각 스타일: 보라색은 선택/완료/행동 요소(버튼, 포커스, 낮음 점)에만 쓰고 나머지는 흰색과 회색으로 둔다. */
+:root {
+  --purple: #7c5cfc;
+  --purple-soft: #f1edff;
+  --purple-press: #5b3fd9;
+  --bg: #fff;
+  --surface: #f7f7fa;
+  --text: #1c1c28;
+  --text-sub: #8a8a9a;
+  --text-done: #b5b5c3;
+  --line: #e6e6ee;
+  --high: #ff5c6c;
+  --normal: #ffb020;
+  --low: #7c5cfc;
+  --shadow: 0 2px 8px rgba(124, 92, 252, 0.08);
+}
+
 body {
   margin: 0;
-  font-family: system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Pretendard', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
 }
 
 main {
   max-width: 960px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 2rem 20px;
+}
+
+h1 {
+  font-size: 24px;
+  font-weight: 700;
 }
 
 .board {
@@ -16,14 +42,15 @@ main {
 }
 
 .column {
-  background: #f3f4f6;
-  border-radius: 8px;
+  background: var(--surface);
+  border-radius: 16px;
   padding: 0.75rem;
 }
 
 .column h2 {
   margin: 0 0 0.75rem;
-  font-size: 1rem;
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .column ul {
@@ -32,63 +59,85 @@ main {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 10px;
 }
 
 .card {
-  background: #fff;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 0.5rem 0.75rem;
-}
-
-.card {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 0.75rem 1rem;
   overflow-wrap: anywhere;
+}
+
+.card strong {
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .card p {
   margin: 0.25rem 0 0;
   white-space: pre-wrap;
-  color: #4b5563;
+  color: var(--text-sub);
+}
+
+.card.done strong {
+  color: var(--text-done);
+  text-decoration: line-through;
 }
 
 .card.overdue {
-  border-color: #b91c1c;
+  border-color: var(--high);
 }
 
 .card-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.35rem 0.6rem;
   margin-top: 0.25rem;
-  font-size: 0.8rem;
+  font-size: 13px;
+  color: var(--text-sub);
 }
 
+/* 우선순위는 색 점 + 글자로 보인다. */
 .badge {
-  padding: 0 0.4rem;
-  border-radius: 999px;
-  border: 1px solid #d1d5db;
-  color: #374151;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--text-sub);
 }
 
-.badge-high {
-  border-color: #f59e0b;
-  color: #92400e;
+.badge::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--normal);
 }
 
-.badge-low {
-  color: #6b7280;
+.badge-high::before {
+  background: var(--high);
+}
+
+.badge-low::before {
+  background: var(--low);
 }
 
 .badge-overdue {
-  border-color: #b91c1c;
-  background: #b91c1c;
+  padding: 0 0.5rem;
+  border-radius: 999px;
+  background: var(--high);
   color: #fff;
 }
 
+.badge-overdue::before {
+  display: none;
+}
+
 .due-date {
-  color: #4b5563;
+  color: var(--text-sub);
 }
 
 .field-row {
@@ -105,17 +154,64 @@ main {
   margin-bottom: 0;
 }
 
+input,
+textarea,
+select {
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1.5px solid transparent;
+  border-radius: 16px;
+  padding: 0.5rem 0.75rem;
+  outline: none;
+}
+
+select {
+  border-radius: 12px;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--purple);
+}
+
+button {
+  font: inherit;
+  font-weight: 500;
+  color: #fff;
+  background: var(--purple);
+  border: none;
+  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+button:active:not(:disabled) {
+  background: var(--purple-press);
+}
+
+button:disabled {
+  background: var(--purple-soft);
+  color: var(--text-done);
+  cursor: default;
+}
+
+.card-actions button {
+  color: var(--purple);
+  background: var(--purple-soft);
+}
+
+.card-actions button:active:not(:disabled) {
+  color: #fff;
+  background: var(--purple-press);
+}
+
 .task-form {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
-}
-
-.task-form input,
-.task-form textarea {
-  font: inherit;
-  padding: 0.4rem 0.5rem;
 }
 
 .task-form button {
@@ -127,7 +223,6 @@ main {
   display: block;
   width: 100%;
   box-sizing: border-box;
-  font: inherit;
   margin-bottom: 0.4rem;
 }
 
@@ -162,11 +257,6 @@ main {
   font-size: 1.1rem;
 }
 
-.auth-form input {
-  font: inherit;
-  padding: 0.4rem 0.5rem;
-}
-
 .auth-form button[type='submit'] {
   align-self: flex-start;
 }
@@ -174,15 +264,13 @@ main {
 .auth-form .link {
   align-self: flex-start;
   background: none;
-  border: none;
   padding: 0;
-  color: #2563eb;
+  color: var(--purple);
   text-decoration: underline;
-  cursor: pointer;
 }
 
 [role='alert'] {
-  color: #b91c1c;
+  color: var(--high);
 }
 
 .breakdown-preview {
@@ -196,11 +284,11 @@ main {
   justify-content: space-between;
   gap: 0.5rem;
   padding: 0.25rem 0;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--line);
 }
 
 .breakdown-preview span {
-  color: #4b5563;
+  color: var(--text-sub);
   white-space: nowrap;
 }
 
@@ -213,7 +301,7 @@ main {
 }
 
 .suggest-reason {
-  color: #4b5563;
+  color: var(--text-sub);
 }
 
 /* [등록] [AI 제안] [AI로 할 일 만들기]를 한 줄에 펼친다.

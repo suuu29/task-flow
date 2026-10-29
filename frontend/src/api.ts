@@ -1,4 +1,4 @@
-import type { BreakdownTask, Status, Suggestion, Task, TaskInput, User } from './types'
+import type { Briefing, BreakdownTask, Status, Suggestion, Task, TaskInput, User } from './types'
 
 // 상태 코드를 담은 오류. 401(로그인 안 됨)을 연결 실패 등과 구분하는 데 쓴다.
 export class ApiError extends Error {
@@ -94,6 +94,11 @@ export async function breakdownTopic(input: { topic: string }): Promise<Breakdow
     body: JSON.stringify(input),
   })
   return body.tasks
+}
+
+// 오늘 브리핑만 받는다. 서버가 로그인한 사용자의 끝나지 않은 할 일을 모으고, 아무것도 저장하지 않는다.
+export function getBriefing(): Promise<Briefing> {
+  return request<Briefing>('/tasks/briefing', { method: 'POST' })
 }
 
 export function changeStatus(id: number, status: Status): Promise<Task> {

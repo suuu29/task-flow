@@ -36,6 +36,18 @@ export interface BreakdownTask {
   due_date: string | null
 }
 
+// POST /tasks/briefing 응답. 저장되지 않는 제안이다. top3 는 먼저 할 일(id · 이유), later 는 미뤄도 되는 일의 id.
+export interface BriefingPick {
+  id: number
+  reason: string
+}
+
+export interface Briefing {
+  top3: BriefingPick[]
+  later: number[]
+  cheer: string
+}
+
 export interface User {
   id: number
   username: string

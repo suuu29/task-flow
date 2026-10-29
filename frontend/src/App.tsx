@@ -11,6 +11,7 @@ import {
 } from './api'
 import AuthForm from './components/AuthForm'
 import Board from './components/Board'
+import BriefingCard from './components/BriefingCard'
 import TaskForm from './components/TaskForm'
 import type { Status, Task, TaskInput, User } from './types'
 
@@ -156,6 +157,7 @@ function App() {
                   refreshTasks()
                 }}
               />
+              <BriefingCard tasks={load.tasks} />
               <Board
                 tasks={load.tasks}
                 onChangeStatus={handleChangeStatus}

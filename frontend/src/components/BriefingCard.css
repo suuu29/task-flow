@@ -1,0 +1,52 @@
+.briefing {
+  margin: 0 0 1rem;
+}
+
+.briefing p[role] {
+  margin: 0.5rem 0 0;
+}
+
+.briefing-card {
+  margin-top: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.briefing-card h2 {
+  margin: 0.5rem 0 0.4rem;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.briefing-card ol,
+.briefing-card ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.briefing-card li {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  overflow-wrap: anywhere;
+}
+
+.briefing-no {
+  color: var(--purple);
+  flex: none;
+}
+
+.briefing-cheer {
+  margin: 0.75rem 0;
+  color: var(--text-sub);
+}
+
+@media (max-width: 767px) {
+  .briefing-card {
+    padding: 0.75rem;
+  }
+}

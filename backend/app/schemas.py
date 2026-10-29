@@ -74,3 +74,14 @@ class User(BaseModel):
     # 응답에는 비밀번호와 해시를 담지 않는다.
     id: int
     username: str
+
+
+class BriefingPick(BaseModel):
+    id: int
+    reason: str
+
+
+class Briefing(BaseModel):
+    top3: list[BriefingPick]
+    later: list[int]
+    cheer: str
