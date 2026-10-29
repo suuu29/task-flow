@@ -1,0 +1,62 @@
+.weekplan {
+  margin: 0 0 1rem;
+}
+
+.weekplan p[role] {
+  margin: 0.5rem 0 0;
+}
+
+.weekplan-card {
+  margin-top: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.weekplan-card table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.weekplan-card th,
+.weekplan-card td {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.weekplan-card th {
+  width: 6.5rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.weekplan-card ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.weekplan-card li {
+  padding: 0.1rem 0;
+}
+
+.weekplan-note {
+  margin: 0.75rem 0;
+  color: var(--text-sub);
+}
+
+@media (max-width: 767px) {
+  .weekplan-card {
+    padding: 0.75rem;
+  }
+
+  .weekplan-card th {
+    width: 5.5rem;
+  }
+}

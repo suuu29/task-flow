@@ -85,3 +85,13 @@ class Briefing(BaseModel):
     top3: list[BriefingPick]
     later: list[int]
     cheer: str
+
+
+class WeekDay(BaseModel):
+    date: str
+    task_ids: list[int]
+
+
+class WeekPlan(BaseModel):
+    days: list[WeekDay]
+    note: list[str]
