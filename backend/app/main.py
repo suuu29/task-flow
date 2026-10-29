@@ -10,6 +10,7 @@ from app.config import get_session_secret
 from app.db import init_db
 from app.suggest import router as suggest_router
 from app.tasks import router as tasks_router
+from app.weekplan import router as weekplan_router
 
 
 @asynccontextmanager
@@ -35,6 +36,7 @@ app.include_router(auth_router)
 app.include_router(suggest_router)  # /tasks/{task_id} 보다 먼저 등록한다.
 app.include_router(breakdown_router)
 app.include_router(briefing_router)  # /tasks/{task_id} 보다 먼저 등록한다.
+app.include_router(weekplan_router)  # /tasks/{task_id} 보다 먼저 등록한다.
 app.include_router(tasks_router)
 
 

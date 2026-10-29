@@ -66,3 +66,14 @@ export const COLUMNS: { status: Status; label: string }[] = [
   { status: 'IN_PROGRESS', label: '진행 중' },
   { status: 'DONE', label: '완료' },
 ]
+
+// POST /tasks/weekplan 응답. 저장되지 않는 제안이다. date 는 YYYY-MM-DD, task_ids 는 그날 할 일의 id.
+export interface WeekDay {
+  date: string
+  task_ids: number[]
+}
+
+export interface WeekPlan {
+  days: WeekDay[]
+  note: string[]
+}

@@ -13,6 +13,7 @@ import AuthForm from './components/AuthForm'
 import Board from './components/Board'
 import BriefingCard from './components/BriefingCard'
 import TaskForm from './components/TaskForm'
+import WeekPlanCard from './components/WeekPlanCard'
 import type { Status, Task, TaskInput, User } from './types'
 
 type Load = { state: 'loading' } | { state: 'error'; message: string } | { state: 'ready'; tasks: Task[] }
@@ -158,6 +159,7 @@ function App() {
                 }}
               />
               <BriefingCard tasks={load.tasks} />
+              <WeekPlanCard tasks={load.tasks} />
               <Board
                 tasks={load.tasks}
                 onChangeStatus={handleChangeStatus}
