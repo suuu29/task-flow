@@ -42,6 +42,10 @@ main {
   padding: 0.5rem 0.75rem;
 }
 
+.card {
+  overflow-wrap: anywhere;
+}
+
 .card p {
   margin: 0.25rem 0 0;
   white-space: pre-wrap;
@@ -243,4 +247,41 @@ main {
 .ai-tools .breakdown-preview {
   flex-basis: 100%;
   margin: 0;
+}
+
+/* 반응형 (R-013, D-034): 768px 미만에서는 열을 위아래로 쌓고, 입력 칸과 버튼은 폭에 맞춘다. */
+@media (max-width: 767px) {
+  main {
+    padding: 1rem 0.75rem;
+  }
+
+  .board {
+    grid-template-columns: 1fr;
+  }
+
+  .app-header {
+    flex-wrap: wrap;
+  }
+
+  .task-form input,
+  .task-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .auth-form {
+    max-width: none;
+  }
+
+  .card-actions {
+    flex-wrap: wrap;
+  }
+
+  .breakdown-preview li {
+    flex-wrap: wrap;
+  }
+
+  .breakdown-preview span {
+    white-space: normal;
+  }
 }
