@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import ValidationError
 
 from app.auth import current_user
 from app.db import connect
@@ -37,14 +38,19 @@ def _to_task(row) -> Task:
 
 @router.get("", response_model=list[Task])
 def list_tasks(user: User = Depends(current_user)) -> list[Task]:
-    # 읽기에 실패하면 예외가 그대로 오류 응답이 된다. 빈 목록으로 응답하지 않는다.
+    # DB를 읽다 실패하면 예외가 그대로 오류 응답이 된다. 빈 목록으로 응답하지 않는다.
     conn = connect()
     try:
         rows = conn.execute("SELECT * FROM tasks WHERE owner_id = ?", (user.id,)).fetchall()
     finally:
         conn.close()
     # 서버가 정렬해서 준다. 기한 초과 → 우선순위 → 마감일 → 만든 순서. (R-012)
-    tasks = [_to_task(r) for r in rows]
+    tasks = []
+    for r in rows:
+        try:
+            tasks.append(_to_task(r))
+        except ValidationError:  # 규칙 밖 값이 든 행은 보드에서 뺀다. 나머지는 그대로 보여 준다.
+            continue
     return sorted(tasks, key=lambda t: sort_key(t.id, t.priority, t.due_date, t.is_overdue))
 
 
