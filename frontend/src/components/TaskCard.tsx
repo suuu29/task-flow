@@ -116,7 +116,11 @@ export default function TaskCard({ task, onChangeStatus, onUpdate, onDelete }: P
   }
 
   return (
-    <li className={task.is_overdue ? 'card overdue' : 'card'}>
+    <li
+      className={['card', task.is_overdue && 'overdue', task.status === 'DONE' && 'done']
+        .filter(Boolean)
+        .join(' ')}
+    >
       <strong>{task.title}</strong>
       <div className="card-meta">
         {/* 기한 초과 여부는 서버가 계산한 값을 그대로 보여 준다. */}
