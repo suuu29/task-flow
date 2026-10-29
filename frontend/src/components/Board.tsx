@@ -1,10 +1,10 @@
-import { COLUMNS, type Status, type Task } from '../types'
+import { COLUMNS, type Status, type Task, type TaskInput } from '../types'
 import TaskCard from './TaskCard'
 
 interface Props {
   tasks: Task[]
   onChangeStatus: (id: number, status: Status) => Promise<void>
-  onUpdate: (id: number, input: { title: string; description: string }) => Promise<void>
+  onUpdate: (id: number, input: TaskInput) => Promise<void>
   onDelete: (id: number) => Promise<void>
 }
 

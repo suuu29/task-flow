@@ -5,9 +5,12 @@ from pathlib import Path
 # 기본 DB 파일은 backend/taskflow.db (*.db 는 .gitignore). 환경변수로 바꿀 수 있다.
 DEFAULT_DB_PATH = Path(__file__).resolve().parent.parent / "taskflow.db"
 
+# 이 열 중 하나라도 없는 tasks 테이블로는 시작하지 않는다. (D-023, #19)
+REQUIRED_TASK_COLUMNS = ("owner_id", "priority", "due_date")
+
 
 class MigrationRequired(RuntimeError):
-    """owner_id 가 없는 예전 tasks 테이블이다. alembic upgrade 로 먼저 이전해야 한다."""
+    """owner_id · priority · due_date 중 없는 열이 있는 예전 tasks 테이블이다. alembic upgrade 로 먼저 이전해야 한다."""
 
 
 def get_db_path() -> Path:
@@ -28,10 +31,11 @@ def init_db(path: Path | None = None) -> None:
     conn = connect(path)
     try:
         cols = [r["name"] for r in conn.execute("PRAGMA table_info(tasks)")]
-        if cols and "owner_id" not in cols:
+        missing = [c for c in REQUIRED_TASK_COLUMNS if c not in cols]
+        if cols and missing:
             # 기존 DB 는 이 함수가 바꾸지 않는다. 백업 후 alembic 으로만 바꾼다.
             raise MigrationRequired(
-                "tasks 테이블에 owner_id 가 없습니다. 백업 후 alembic upgrade 로 이전하세요."
+                f"tasks 테이블에 {', '.join(missing)} 열이 없습니다. 백업 후 alembic upgrade 로 이전하세요."
             )
         with conn:
             conn.execute(
@@ -59,7 +63,9 @@ def init_db(path: Path | None = None) -> None:
                     title TEXT NOT NULL,
                     description TEXT NOT NULL DEFAULT '',
                     status TEXT NOT NULL,
-                    owner_id INTEGER NOT NULL REFERENCES users(id)
+                    owner_id INTEGER NOT NULL REFERENCES users(id),
+                    priority TEXT NOT NULL DEFAULT 'NORMAL',
+                    due_date TEXT
                 )
                 """
             )

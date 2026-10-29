@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { COLUMNS, type Status, type Task } from '../types'
+import { COLUMNS, PRIORITIES, type Priority, type Status, type Task, type TaskInput } from '../types'
+import SuggestControls from './SuggestControls'
 
 interface Props {
   task: Task
   onChangeStatus: (id: number, status: Status) => Promise<void>
-  onUpdate: (id: number, input: { title: string; description: string }) => Promise<void>
+  onUpdate: (id: number, input: TaskInput) => Promise<void>
   onDelete: (id: number) => Promise<void>
 }
 
@@ -12,6 +13,8 @@ export default function TaskCard({ task, onChangeStatus, onUpdate, onDelete }: P
   const [editing, setEditing] = useState(false)
   const [title, setTitle] = useState(task.title)
   const [description, setDescription] = useState(task.description)
+  const [priority, setPriority] = useState<Priority>(task.priority)
+  const [dueDate, setDueDate] = useState(task.due_date ?? '')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -33,6 +36,8 @@ export default function TaskCard({ task, onChangeStatus, onUpdate, onDelete }: P
   function startEdit() {
     setTitle(task.title)
     setDescription(task.description)
+    setPriority(task.priority)
+    setDueDate(task.due_date ?? '')
     setError(null)
     setEditing(true)
   }
@@ -43,7 +48,9 @@ export default function TaskCard({ task, onChangeStatus, onUpdate, onDelete }: P
       setError('제목을 입력하세요.')
       return
     }
-    if (await run(() => onUpdate(task.id, { title, description }))) setEditing(false)
+    // 마감일을 비우면 null 로 보내 마감일을 지운다.
+    const input: TaskInput = { title, description, priority, due_date: dueDate || null }
+    if (await run(() => onUpdate(task.id, input))) setEditing(false)
   }
 
   async function remove() {
@@ -61,6 +68,40 @@ export default function TaskCard({ task, onChangeStatus, onUpdate, onDelete }: P
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
+        <div className="field-row">
+          <label>
+            우선순위{' '}
+            <select
+              aria-label="우선순위"
+              value={priority}
+              onChange={(e) => setPriority(e.target.value as Priority)}
+            >
+              {PRIORITIES.map((p) => (
+                <option key={p.priority} value={p.priority}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            마감일{' '}
+            <input
+              type="date"
+              aria-label="마감일"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+            />
+          </label>
+        </div>
+        <SuggestControls
+          title={title}
+          description={description}
+          onSuggested={(p, d) => {
+            // 위 칸을 채우기만 한다. 저장은 [저장]을 눌러야 한다.
+            setPriority(p)
+            setDueDate(d ?? '')
+          }}
+        />
         <div className="card-actions">
           <button onClick={save} disabled={busy}>
             저장
@@ -75,8 +116,16 @@ export default function TaskCard({ task, onChangeStatus, onUpdate, onDelete }: P
   }
 
   return (
-    <li className="card">
+    <li className={task.is_overdue ? 'card overdue' : 'card'}>
       <strong>{task.title}</strong>
+      <div className="card-meta">
+        {/* 기한 초과 여부는 서버가 계산한 값을 그대로 보여 준다. */}
+        {task.is_overdue && <span className="badge badge-overdue">기한 초과</span>}
+        <span className={`badge badge-${task.priority.toLowerCase()}`}>
+          {PRIORITIES.find((p) => p.priority === task.priority)?.label ?? task.priority}
+        </span>
+        {task.due_date && <span className="due-date">마감 {task.due_date}</span>}
+      </div>
       {task.description && <p>{task.description}</p>}
       <div className="card-actions">
         <select

@@ -1,4 +1,4 @@
-import type { Status, Task, User } from './types'
+import type { BreakdownTask, Status, Suggestion, Task, TaskInput, User } from './types'
 
 // 상태 코드를 담은 오류. 401(로그인 안 됨)을 연결 실패 등과 구분하는 데 쓴다.
 export class ApiError extends Error {
@@ -69,12 +69,31 @@ export function listTasks(): Promise<Task[]> {
   return request<Task[]>('/tasks')
 }
 
-export function createTask(input: { title: string; description: string }): Promise<Task> {
+export function createTask(input: TaskInput): Promise<Task> {
   return request<Task>('/tasks', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: JSON_HEADERS,
     body: JSON.stringify(input),
   })
+}
+
+// 제안만 받는다. 서버는 아무것도 저장하지 않는다.
+export function suggestTask(input: { title: string; description: string }): Promise<Suggestion> {
+  return request<Suggestion>('/tasks/suggest', {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    body: JSON.stringify(input),
+  })
+}
+
+// 주제를 3~5개의 할 일로 나눈 제안만 받는다. 서버는 아무것도 저장하지 않는다.
+export async function breakdownTopic(input: { topic: string }): Promise<BreakdownTask[]> {
+  const body = await request<{ tasks: BreakdownTask[] }>('/tasks/breakdown', {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    body: JSON.stringify(input),
+  })
+  return body.tasks
 }
 
 export function changeStatus(id: number, status: Status): Promise<Task> {
@@ -85,10 +104,7 @@ export function changeStatus(id: number, status: Status): Promise<Task> {
   })
 }
 
-export function updateTask(
-  id: number,
-  input: { title: string; description: string },
-): Promise<Task> {
+export function updateTask(id: number, input: TaskInput): Promise<Task> {
   return request<Task>(`/tasks/${id}`, {
     method: 'PATCH',
     headers: JSON_HEADERS,

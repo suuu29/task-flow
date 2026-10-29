@@ -24,6 +24,17 @@ def _read_env_file(path: Path) -> dict[str, str]:
     return values
 
 
+def get_anthropic_api_key(env_path: Path | None = None) -> str:
+    # 없어도 서버는 시작한다. 호출하는 쪽이 503으로 응답한다. 값은 메시지에 넣지 않는다.
+    value = os.environ.get("ANTHROPIC_API_KEY") or _read_env_file(env_path or ENV_PATH).get(
+        "ANTHROPIC_API_KEY", ""
+    )
+    value = value.strip()
+    if not value:
+        raise ConfigError("ANTHROPIC_API_KEY 가 비어 있습니다.")
+    return value
+
+
 def get_session_secret(env_path: Path | None = None) -> str:
     # 환경변수가 우선이고, 없으면 backend/.env 를 본다. 비어 있으면 시작을 거부한다.
     value = os.environ.get("SESSION_SECRET") or _read_env_file(env_path or ENV_PATH).get(

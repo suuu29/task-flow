@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   ApiError,
   changeStatus,
@@ -12,7 +12,7 @@ import {
 import AuthForm from './components/AuthForm'
 import Board from './components/Board'
 import TaskForm from './components/TaskForm'
-import type { Status, Task, User } from './types'
+import type { Status, Task, TaskInput, User } from './types'
 
 type Load = { state: 'loading' } | { state: 'error'; message: string } | { state: 'ready'; tasks: Task[] }
 type Auth =
@@ -72,14 +72,37 @@ function App() {
     setLoad((prev) => (prev.state === 'ready' ? { state: 'ready', tasks: fn(prev.tasks) } : prev))
   }
 
+  // 서버가 정렬하고 기한 초과를 계산하므로, 등록·수정·상태 변경이 성공하면 목록을 다시 불러와 맞춘다.
+  // 다시 불러오지 못하면 지금 화면 상태를 그대로 둔다. 로그아웃·사용자 변경 뒤나 더 새로운 요청이 있으면 응답을 버린다.
+  const userIdRef = useRef<number | null>(null)
+  useEffect(() => {
+    userIdRef.current = userId
+  }, [userId])
+  const refreshSeq = useRef(0)
+
+  function refreshTasks() {
+    const requestedFor = userIdRef.current
+    const seq = ++refreshSeq.current
+    listTasks()
+      .then((tasks) => {
+        if (userIdRef.current !== requestedFor || refreshSeq.current !== seq) return
+        withTasks(() => tasks)
+      })
+      .catch(() => {
+        // 화면 상태를 유지한다.
+      })
+  }
+
   async function handleChangeStatus(id: number, status: Status) {
     withTasks((tasks) => tasks.map((t) => (t.id === id ? { ...t, status } : t)))
     await changeStatus(id, status)
+    refreshTasks()
   }
 
-  async function handleUpdate(id: number, input: { title: string; description: string }) {
+  async function handleUpdate(id: number, input: TaskInput) {
     const saved = await updateTask(id, input)
     withTasks((tasks) => tasks.map((t) => (t.id === id ? saved : t)))
+    refreshTasks()
   }
 
   async function handleDelete(id: number) {
@@ -127,7 +150,12 @@ function App() {
           {load.state === 'error' && <p role="alert">{load.message}</p>}
           {load.state === 'ready' && (
             <>
-              <TaskForm onCreated={(task) => withTasks((tasks) => [...tasks, task])} />
+              <TaskForm
+                onCreated={(task) => {
+                  withTasks((tasks) => [...tasks, task])
+                  refreshTasks()
+                }}
+              />
               <Board
                 tasks={load.tasks}
                 onChangeStatus={handleChangeStatus}

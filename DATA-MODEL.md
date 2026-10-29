@@ -2,7 +2,7 @@
 
 # DATA-MODEL
 
-근거: [PRD.md](PRD.md) (4절), [ARCHITECTURE.md](ARCHITECTURE.md) (4절, 작성 중), [API-SPEC.md](API-SPEC.md), [DECISIONS.md](DECISIONS.md) (D-002~D-012)
+근거: [PRD.md](PRD.md) (4절), [ARCHITECTURE.md](ARCHITECTURE.md) (4절, 작성 중), [API-SPEC.md](API-SPEC.md), [DECISIONS.md](DECISIONS.md) (D-002~D-012), [BUSINESS-RULES.md](BUSINESS-RULES.md) (#19 우선순위와 마감일)
 
 카드(Task) 한 건이 저장소에서 가지는 값을 적는다.
 
@@ -11,8 +11,9 @@
 - **필드 이름(id, title, description, status, created_at, updated_at)과 status 저장값(TODO · IN_PROGRESS · DONE)은 요청에서 받은 것이다.** DECISIONS.md에 기록된 결정이 아니고 D-번호가 없다. 확정할지는 결정 필요이다.
 - **created_at과 updated_at은 PRD, ARCHITECTURE, DECISIONS 어디에도 없다.** PRD 4절의 카드 정보는 제목, 설명, 상태이고 ARCHITECTURE 4절의 저장 값은 카드 구분값, 제목, 설명, 상태이다. 요청에 따라 표에 넣었지만 저장하는지부터 결정 필요이다.
 - 컬럼 타입, 길이, 테이블 이름, 인덱스는 정해진 것이 없어 적지 않는다.
+- **priority와 due_date는 2026-10-26에 사용자가 정한 결정(#19, R-009~R-012)이다.** D-번호는 아직 없다. 이 두 값의 규칙은 [BUSINESS-RULES.md](BUSINESS-RULES.md)에 있고, 정해지지 않은 부분은 **결정 필요**로 남겼다.
 - 이 문서에 넣지 않은 것:
-  - 마감일: 첫 버전에 없다. (PRD 4절, Later)
+  - 기한 초과: 저장하지 않는 값이다. 서버가 목록을 줄 때 계산한다. (BUSINESS-RULES 3절)
   - 담당자와 로그인: 첫 버전에 없다.
   - 카드 순서를 위한 값: 순서가 정해지지 않았다. (Q-3, ARCHITECTURE 4절에 "미정")
   - 삭제 표시를 위한 값: 완전 삭제인지 복구가 가능한지 정해지지 않았다. (Q-4)
@@ -36,6 +37,8 @@ DECISIONS.md에 이미 있는 것만 적는다.
 | status | 카드가 할 일 · 진행 중 · 완료 중 어디에 있는지 | 사용자. 자동으로 바뀌지 않는다. (PRD 4절, D-007) | 필수 (PRD 4절) | 사용자가 어느 상태로든 바꾼다. 순서 제한이 없고 완료에서 되돌릴 수 있다. (D-007) |
 | created_at | 카드를 만든 시각 | **결정 필요** | **결정 필요** | **결정 필요** |
 | updated_at | 카드를 마지막으로 고친 시각 | **결정 필요** | **결정 필요** | **결정 필요** |
+| priority | 카드의 우선순위 (LOW · NORMAL · HIGH) | 사용자 (R-009) | 값이 항상 있다. 기본값 NORMAL (BUSINESS-RULES 1절) | 사용자가 바꾼다. 지울 수 없다 (API-SPEC-CHANGE 7.4) |
+| due_date | 카드의 마감일 (날짜만) | 사용자 (R-010) | 선택. 비울 수 있다 (BUSINESS-RULES 2절) | 사용자가 바꾸거나 지울 수 있다 (API-SPEC-CHANGE 7.4) |
 
 ### 2.1 id
 - 정해진 것: 카드마다 하나이고 필수이다. 만드는 방법은 설계 단계에서 정한다. (ARCHITECTURE 4절)
@@ -81,6 +84,25 @@ DECISIONS.md에 이미 있는 것만 적는다.
   - 시간 형식과 시간대.
   - 화면에 보여 줄지.
 
+### 2.7 priority
+- 정해진 것: 값은 LOW · NORMAL · HIGH 세 개이다. 기본값은 NORMAL이다. 사용자가 고르고(R-009) 지울 수 없다. 세 값이 아닌 값은 저장하지 않고 API가 거절한다(422). (BUSINESS-RULES 1절, API-SPEC-CHANGE 7.4, 7.6)
+- 이미 있는 Task는 NORMAL이 된다.
+- 읽음: 지울 수 없으므로 값이 없는 상태는 없다.
+- 결정 필요 (질문 번호 없음):
+  - 컬럼 타입.
+  - 저장소가 세 값만 받도록 제한을 둘지, API 검증만으로 막을지. (3절의 status와 같은 질문, IMPACT-ANALYSIS N-6)
+  - 기존 DB에 이 열을 더하는 절차와, 이 열이 없는 DB로 시작할 때의 동작. (IMPACT-ANALYSIS N-9, N-10)
+
+### 2.8 due_date
+- 정해진 것: 날짜만 저장한다. 형식은 YYYY-MM-DD이다. 비울 수 있다. 과거 날짜도 저장할 수 있다. 사용자가 바꾸거나 지울 수 있다(R-010). 형식에 맞지 않는 값은 저장하지 않고 API가 거절한다(422). (BUSINESS-RULES 2절, API-SPEC-CHANGE 7.4, 7.6)
+- 이미 있는 Task는 마감일이 없다.
+- 읽음: 기한 초과는 이 열에서 계산하는 값이고 따로 저장하지 않는다. (BUSINESS-RULES 3절)
+- 결정 필요 (질문 번호 없음):
+  - 컬럼 타입.
+  - 마감일 없음을 값 없음으로 둘지 빈 문자열로 둘지. (2.3 description과 같은 종류의 질문)
+  - 저장소에서 날짜 형식을 제한할지, API 검증만으로 막을지. (IMPACT-ANALYSIS N-6)
+  - 기한 초과 계산에 쓰는 "오늘"의 시간대. (BUSINESS-RULES 6절)
+
 ## 3. status 화면 표시와 저장값
 
 | 화면 표시 | 저장값 | 근거 |
@@ -115,3 +137,7 @@ DECISIONS.md에 이미 있는 것만 적는다.
 | created_at, updated_at의 입력 주체, 변경 규칙, 형식, 시간대, 화면 표시 | 번호 없음 | 2.5, 2.6 |
 | 저장소에서 status 값 제한을 둘지 | 번호 없음 | 3 |
 | 컬럼 타입, 길이, 테이블 이름, 인덱스 | 번호 없음 | (이 문서에 넣지 않음) |
+| priority, due_date의 컬럼 타입 | 번호 없음 | 2.7, 2.8 |
+| priority, due_date 값을 저장소에서 제한할지 | 번호 없음 (IMPACT-ANALYSIS N-6) | 2.7, 2.8 |
+| 마감일 없음의 저장 표현 | 번호 없음 | 2.8 |
+| 기존 DB에 priority, due_date를 더하는 절차, 열이 없는 DB로 시작할 때의 동작 | 번호 없음 (IMPACT-ANALYSIS N-9, N-10) | 2.7 |

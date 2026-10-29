@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from app.config import ConfigError, get_session_secret
+from app.config import ConfigError, get_anthropic_api_key, get_session_secret
 
 # 테스트용 가짜 값이다.
 FAKE = "fake-secret-for-test"
@@ -50,6 +50,35 @@ class SessionSecretTest(unittest.TestCase):
             get_session_secret(self.env)
         except ConfigError as e:
             self.assertNotIn(FAKE, str(e))
+
+
+class AnthropicKeyTest(unittest.TestCase):
+    def setUp(self):
+        self._old = os.environ.pop("ANTHROPIC_API_KEY", None)
+        self._tmp = tempfile.TemporaryDirectory()
+        self.env = Path(self._tmp.name) / ".env"
+
+    def tearDown(self):
+        os.environ.pop("ANTHROPIC_API_KEY", None)
+        if self._old is not None:
+            os.environ["ANTHROPIC_API_KEY"] = self._old
+        self._tmp.cleanup()
+
+    def test_reads_from_env_file(self):
+        self.env.write_text(f"ANTHROPIC_API_KEY={FAKE}\n", encoding="utf-8")
+        self.assertEqual(get_anthropic_api_key(self.env), FAKE)
+
+    def test_environment_variable_wins(self):
+        self.env.write_text("ANTHROPIC_API_KEY=from-file\n", encoding="utf-8")
+        os.environ["ANTHROPIC_API_KEY"] = FAKE
+        self.assertEqual(get_anthropic_api_key(self.env), FAKE)
+
+    def test_missing_or_blank_is_refused(self):
+        with self.assertRaises(ConfigError):
+            get_anthropic_api_key(self.env)
+        os.environ["ANTHROPIC_API_KEY"] = "  "
+        with self.assertRaises(ConfigError):
+            get_anthropic_api_key(self.env)
 
 
 if __name__ == "__main__":

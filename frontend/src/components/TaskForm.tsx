@@ -1,12 +1,17 @@
 import { useState, type FormEvent } from 'react'
 import { createTask } from '../api'
-import type { Task } from '../types'
+import { PRIORITIES, type Priority, type Task } from '../types'
+import BreakdownControls from './BreakdownControls'
+import SuggestControls from './SuggestControls'
 
 export default function TaskForm({ onCreated }: { onCreated: (task: Task) => void }) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [priority, setPriority] = useState<Priority>('NORMAL')
+  const [dueDate, setDueDate] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [suggestKey, setSuggestKey] = useState(0)
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -18,11 +23,15 @@ export default function TaskForm({ onCreated }: { onCreated: (task: Task) => voi
     setError(null)
     setSaving(true)
     try {
-      const task = await createTask({ title, description })
+      // 마감일을 비워 두면 마감일 없음(null)이다.
+      const task = await createTask({ title, description, priority, due_date: dueDate || null })
       // 저장 성공 응답을 받은 뒤에만 카드를 보여 준다. (D-004)
       onCreated(task)
       setTitle('')
       setDescription('')
+      setPriority('NORMAL')
+      setDueDate('')
+      setSuggestKey((k) => k + 1) // 제안 이유도 비운다.
     } catch (err) {
       // 실패하면 입력한 내용을 그대로 둔다.
       setError(err instanceof Error ? err.message : '저장하지 못했습니다.')
@@ -45,9 +54,47 @@ export default function TaskForm({ onCreated }: { onCreated: (task: Task) => voi
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
-      <button type="submit" disabled={saving}>
-        {saving ? '저장 중...' : '등록'}
-      </button>
+      <div className="field-row">
+        <label>
+          우선순위{' '}
+          <select
+            aria-label="우선순위"
+            value={priority}
+            onChange={(e) => setPriority(e.target.value as Priority)}
+          >
+            {PRIORITIES.map((p) => (
+              <option key={p.priority} value={p.priority}>
+                {p.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          마감일{' '}
+          <input
+            type="date"
+            aria-label="마감일"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+          />
+        </label>
+      </div>
+      <div className="ai-tools">
+        <button type="submit" className="ai-btn" disabled={saving}>
+          {saving ? '저장 중...' : '등록'}
+        </button>
+        <SuggestControls
+          key={suggestKey}
+          title={title}
+          description={description}
+          onSuggested={(p, d) => {
+            // 위 칸을 채우기만 한다. 저장은 [등록]을 눌러야 한다.
+            setPriority(p)
+            setDueDate(d ?? '')
+          }}
+        />
+        <BreakdownControls topic={title} onCreated={onCreated} />
+      </div>
       {error && <p role="alert">{error}</p>}
     </form>
   )
