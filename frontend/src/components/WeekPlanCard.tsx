@@ -24,27 +24,33 @@ export default function WeekPlanCard({ tasks }: { tasks: Task[] }) {
       {value.state === 'empty' && <p role="status">{EMPTY_MESSAGE}</p>}
       {value.state === 'done' && (
         <div className="weekplan-card">
-          <table>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.date}>
-                  <th scope="row">{formatDay(r.date)}</th>
-                  <td>
-                    <ul>
-                      {r.titles.map(([id, title]) => (
-                        <li key={id}>{title}</li>
-                      ))}
-                    </ul>
-                  </td>
-                </tr>
+          {rows.length === 0 ? (
+            <p role="status">{EMPTY_MESSAGE}</p>
+          ) : (
+            <>
+              <table>
+                <tbody>
+                  {rows.map((r) => (
+                    <tr key={r.date}>
+                      <th scope="row">{formatDay(r.date)}</th>
+                      <td>
+                        <ul>
+                          {r.titles.map(([id, title]) => (
+                            <li key={id}>{title}</li>
+                          ))}
+                        </ul>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {value.plan.note.map((n, i) => (
+                <p key={i} className="weekplan-note">
+                  {n}
+                </p>
               ))}
-            </tbody>
-          </table>
-          {value.plan.note.map((n, i) => (
-            <p key={i} className="weekplan-note">
-              {n}
-            </p>
-          ))}
+            </>
+          )}
           <button type="button" onClick={close}>
             닫기
           </button>

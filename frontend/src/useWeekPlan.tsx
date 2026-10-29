@@ -12,8 +12,8 @@ type State =
   | { state: 'error'; message: string }
 
 function failureMessage(err: unknown): string {
-  if (err instanceof ApiError && err.status === 503) return '지금은 이번 주 계획을 쓸 수 없습니다'
-  if (err instanceof ApiError && err.status === 502) return '이번 주 계획을 받지 못했습니다'
+  if (err instanceof ApiError && err.status === 503) return '지금은 이번 주 계획을 쓸 수 없습니다 잠시 뒤 다시 눌러 주세요'
+  if (err instanceof ApiError && err.status === 502) return '이번 주 계획을 받지 못했습니다 잠시 뒤 다시 눌러 주세요'
   return err instanceof Error ? err.message : '이번 주 계획을 받지 못했습니다'
 }
 
