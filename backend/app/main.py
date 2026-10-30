@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.auth import router as auth_router
 from app.breakdown import router as breakdown_router
 from app.briefing import router as briefing_router
+from app.command import router as command_router
 from app.config import get_session_secret
 from app.db import init_db
 from app.suggest import router as suggest_router
@@ -35,6 +36,7 @@ app.include_router(auth_router)
 app.include_router(suggest_router)  # /tasks/{task_id} 보다 먼저 등록한다.
 app.include_router(breakdown_router)
 app.include_router(briefing_router)  # /tasks/{task_id} 보다 먼저 등록한다.
+app.include_router(command_router)  # /tasks/{task_id} 보다 먼저 등록한다.
 app.include_router(tasks_router)
 
 

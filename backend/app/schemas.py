@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel
 
@@ -62,6 +62,25 @@ class BreakdownTask(BaseModel):
 
 class Breakdown(BaseModel):
     tasks: list[BreakdownTask]
+
+
+class CommandRequest(BaseModel):
+    # 값 검사는 rules.py 한 곳에서 한다. (D-006)
+    text: Any = None
+
+
+class CommandAction(BaseModel):
+    # add: title · priority · due_date / due: id · due_date / done: id. 해당 없는 칸은 None.
+    kind: Literal["add", "due", "done"]
+    id: int | None
+    title: str | None
+    priority: Priority | None
+    due_date: str | None
+
+
+class Command(BaseModel):
+    actions: list[CommandAction]
+    ask: str | None
 
 
 class Credentials(BaseModel):

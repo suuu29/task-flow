@@ -64,6 +64,19 @@ def validate_topic(topic: object) -> str:
     return value
 
 
+MAX_COMMAND_LENGTH = 200  # 너무 긴 입력으로 모델 호출 비용이 커지는 것을 막는다.
+
+
+def validate_command(text: object) -> str:
+    # 필수이고 공백만 있으면 거부한다. 앞뒤 공백은 지운다.
+    if not isinstance(text, str) or not text.strip():
+        raise RuleError("문장은 비워 둘 수 없습니다.")
+    value = text.strip()
+    if len(value) > MAX_COMMAND_LENGTH:
+        raise RuleError(f"문장은 {MAX_COMMAND_LENGTH}자 이하여야 합니다.")
+    return value
+
+
 _DATE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
 
 
