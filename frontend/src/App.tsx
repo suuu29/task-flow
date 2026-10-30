@@ -12,6 +12,7 @@ import {
 import AuthForm from './components/AuthForm'
 import Board from './components/Board'
 import BriefingCard from './components/BriefingCard'
+import CommandBar from './components/CommandBar'
 import TaskForm from './components/TaskForm'
 import type { Status, Task, TaskInput, User } from './types'
 
@@ -158,6 +159,7 @@ function App() {
                 }}
               />
               <BriefingCard tasks={load.tasks} />
+              <CommandBar tasks={load.tasks} onApplied={refreshTasks} />
               <Board
                 tasks={load.tasks}
                 onChangeStatus={handleChangeStatus}

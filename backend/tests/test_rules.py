@@ -7,6 +7,7 @@ from app.rules import (
     Status,
     is_overdue,
     sort_key,
+    validate_command,
     validate_description,
     validate_due_date,
     validate_priority,
@@ -30,6 +31,22 @@ class TopicRuleTest(unittest.TestCase):
             with self.subTest(bad=bad):
                 with self.assertRaises(RuleError):
                     validate_topic(bad)
+
+
+class CommandRuleTest(unittest.TestCase):
+    def test_trims(self):
+        self.assertEqual(validate_command("  장보기 끝냈어  "), "장보기 끝냈어")
+
+    def test_length_limit(self):
+        self.assertEqual(validate_command("가" * 200), "가" * 200)
+        with self.assertRaises(RuleError):
+            validate_command("가" * 201)
+
+    def test_rejects_empty_and_not_string(self):
+        for bad in ["", "   ", None, 3]:
+            with self.subTest(bad=bad):
+                with self.assertRaises(RuleError):
+                    validate_command(bad)
 
 
 class TitleRuleTest(unittest.TestCase):

@@ -66,3 +66,19 @@ export const COLUMNS: { status: Status; label: string }[] = [
   { status: 'IN_PROGRESS', label: '진행 중' },
   { status: 'DONE', label: '완료' },
 ]
+
+// POST /tasks/command 응답의 한 항목. 저장되지 않는 제안이다. add 는 id 가 null,
+// due · done 은 title · priority 가 null 일 수 있다.
+export interface CommandAction {
+  kind: 'add' | 'due' | 'done'
+  id: number | null
+  title: string | null
+  priority: Priority | null
+  due_date: string | null
+}
+
+// ask 가 있으면 못 알아들은 것이고 actions 는 비어 있다.
+export interface CommandResult {
+  actions: CommandAction[]
+  ask: string | null
+}

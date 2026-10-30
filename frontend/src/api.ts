@@ -1,4 +1,4 @@
-import type { Briefing, BreakdownTask, Status, Suggestion, Task, TaskInput, User } from './types'
+import type { Briefing, BreakdownTask, CommandResult, Status, Suggestion, Task, TaskInput, User } from './types'
 
 // 상태 코드를 담은 오류. 401(로그인 안 됨)을 연결 실패 등과 구분하는 데 쓴다.
 export class ApiError extends Error {
@@ -119,4 +119,13 @@ export function updateTask(id: number, input: TaskInput): Promise<Task> {
 
 export function deleteTask(id: number): Promise<void> {
   return request<void>(`/tasks/${id}`, { method: 'DELETE' })
+}
+
+// 한 문장을 카드 변경 제안으로 바꿔 받는다. 서버는 아무것도 저장하지 않는다.
+export function sendCommand(text: string): Promise<CommandResult> {
+  return request<CommandResult>('/tasks/command', {
+    method: 'POST',
+    headers: JSON_HEADERS,
+    body: JSON.stringify({ text }),
+  })
 }
